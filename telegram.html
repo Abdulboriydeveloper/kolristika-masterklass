@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ro'yxatdan o'tish – Nargiza Khayitbayevna</title>
+  <meta name="description" content="Masterklassga ro'yxatdan o'tish — telefon raqamingizni kiriting.">
+
+  <!-- Preconnect faqat kerakli domenlar -->
+  <link rel="preconnect" href="https://connect.facebook.net" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- Font yuklash: swap bilan — render bloklanmaydi -->
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Nunito:wght@600;700&display=swap"
+    media="print" onload="this.media='all'">
+  <noscript>
+    <link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Nunito:wght@600;700&display=swap">
+  </noscript>
+
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+    :root{
+      --green:#22c55e;
+      --gd:#16a34a;
+      --text:#111827;
+      --muted:#6b7280;
+    }
+
+    body{
+      font-family:'Nunito','Segoe UI',system-ui,sans-serif;
+      background:#f0fdf4;color:var(--text);
+      min-height:100vh;display:flex;
+      align-items:center;justify-content:center;
+      -webkit-font-smoothing:antialiased;
+    }
+
+    .page{
+      max-width:420px;width:100%;margin:0 auto;
+      background:#fff;min-height:100vh;
+      display:flex;flex-direction:column;
+      align-items:center;justify-content:center;
+      padding:48px 28px 56px;text-align:center;
+      box-shadow:0 0 60px rgba(0,0,0,.07);
+    }
+
+    .screen{width:100%;display:flex;flex-direction:column;align-items:center}
+    .screen[hidden]{display:none}
+
+    .title{
+      font-family:'Montserrat','Segoe UI',system-ui,sans-serif;
+      font-size:clamp(24px,6vw,32px);font-weight:900;
+      line-height:1.15;color:var(--text);margin-bottom:12px;
+      animation:fadeUp .5s .15s ease both;
+    }
+    .title .green{color:var(--gd)}
+
+    .subtitle{
+      font-size:15px;font-weight:600;color:var(--muted);
+      line-height:1.65;max-width:300px;margin:0 auto 24px;
+      animation:fadeUp .5s .25s ease both;
+    }
+
+    .event-pill{
+      display:inline-flex;align-items:center;gap:8px;
+      background:#f0fdf4;border:1.5px solid #bbf7d0;
+      border-radius:100px;padding:10px 20px;
+      font-size:14px;font-weight:700;color:#14532d;
+      margin-bottom:28px;animation:fadeUp .5s .3s ease both;
+    }
+
+    .note{
+      margin-top:18px;font-size:12px;color:var(--muted);
+      line-height:1.65;animation:fadeUp .5s .55s ease both;
+    }
+
+    /* PHONE SCREEN */
+    .tel-icon-wrap{
+      width:72px;height:72px;margin:0 auto 18px;
+      background:#f0fdf4;border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      font-size:34px;box-shadow:0 4px 14px rgba(34,197,94,.18);
+      animation:bounceIn .6s .05s cubic-bezier(.175,.885,.32,1.275) both;
+      contain:layout style;
+    }
+
+    .tel-form{width:100%;margin-top:6px;animation:fadeUp .5s .35s ease both}
+
+    .tel-label{
+      display:block;text-align:left;font-size:11.5px;font-weight:800;
+      color:var(--muted);letter-spacing:.6px;margin-bottom:8px;
+      text-transform:uppercase;
+    }
+
+    .tel-input-wrap{
+      display:flex;align-items:center;gap:10px;
+      border:2px solid var(--gd);border-radius:14px;
+      padding:16px 18px;margin-bottom:8px;
+      box-shadow:0 0 0 4px rgba(34,197,94,.10);
+      transition:box-shadow .15s,border-color .15s;
+    }
+    .tel-input-wrap.error{border-color:#e11d48;box-shadow:0 0 0 4px rgba(225,29,72,.10)}
+
+    .tel-prefix{
+      display:flex;align-items:center;gap:6px;
+      font-size:16px;font-weight:800;color:var(--text);
+      padding-right:12px;border-right:1px solid #e5e7eb;flex-shrink:0;
+    }
+
+    #phoneInput{
+      border:none;outline:none;font-size:16px;font-weight:700;
+      color:var(--text);width:100%;font-family:inherit;
+      background:transparent;letter-spacing:.5px;
+    }
+    #phoneInput::placeholder{color:#9ca3af;font-weight:600}
+
+    .tel-error{
+      display:none;text-align:left;color:#e11d48;
+      font-size:11.5px;font-weight:700;margin:0 0 16px;
+    }
+    .tel-error.show{display:block}
+
+    .tel-submit{
+      display:flex;align-items:center;justify-content:center;gap:8px;
+      width:100%;background:var(--gd);color:#fff;
+      font-family:'Montserrat','Segoe UI',system-ui,sans-serif;
+      font-size:16px;font-weight:900;letter-spacing:.4px;
+      border:none;border-radius:18px;padding:18px 20px;cursor:pointer;
+      box-shadow:0 8px 0 #14532d,0 12px 28px rgba(34,197,94,.35);
+      transition:transform .1s,box-shadow .1s,opacity .15s;
+      margin-bottom:22px;will-change:transform;
+    }
+    .tel-submit:hover{transform:translateY(2px);box-shadow:0 6px 0 #14532d,0 10px 24px rgba(34,197,94,.4)}
+    .tel-submit:active{transform:translateY(8px);box-shadow:0 1px 0 #14532d,0 4px 12px rgba(34,197,94,.4)}
+    .tel-submit:disabled{opacity:.7;cursor:default}
+
+    /* CONGRATS SCREEN */
+    .check-wrap{position:relative;width:96px;height:96px;margin-bottom:28px;contain:layout style}
+
+    .check-bg{
+      width:96px;height:96px;background:#dcfce7;border-radius:50%;
+      position:absolute;inset:0;
+      animation:popIn .55s cubic-bezier(.175,.885,.32,1.275) both;
+    }
+    .check-ring{
+      position:absolute;inset:-6px;border-radius:50%;
+      border:3px solid #bbf7d0;
+      animation:popIn .55s .1s cubic-bezier(.175,.885,.32,1.275) both;
+    }
+    .check-svg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+    .check-svg path{stroke-dasharray:44;stroke-dashoffset:44;animation:drawCheck .45s .45s ease forwards}
+
+    .confetti{font-size:28px;line-height:1;display:block;margin-bottom:16px;animation:bounceIn .6s .3s cubic-bezier(.175,.885,.32,1.275) both}
+
+    .congrats-screen .title{animation:fadeUp .5s .35s ease both}
+    .congrats-screen .subtitle{animation:fadeUp .5s .45s ease both}
+    .congrats-screen .event-pill{animation:fadeUp .5s .5s ease both}
+    .congrats-screen .note{animation:fadeUp .5s .75s ease both}
+
+    .arrow-down{font-size:28px;line-height:1;display:block;margin-bottom:14px;will-change:transform;animation:arrowBounce 1s .9s ease infinite}
+
+    .tg-btn{
+      display:flex;align-items:center;justify-content:center;gap:14px;
+      width:100%;padding:22px 28px;
+      background:linear-gradient(135deg,#31b6e8 0%,#1a7fb0 100%);
+      color:#fff;font-family:'Montserrat','Segoe UI',system-ui,sans-serif;
+      font-size:18px;font-weight:900;letter-spacing:.3px;
+      text-decoration:none;border-radius:20px;border:none;cursor:pointer;
+      position:relative;overflow:hidden;will-change:transform;
+      animation:fadeUp .5s .6s ease both,btnShake 1.8s 1.5s ease infinite;
+      box-shadow:0 8px 0 #1265a0,0 12px 32px rgba(26,127,176,.45);
+      transform-origin:center bottom;
+      transition:box-shadow .15s,transform .15s;
+    }
+    .tg-btn:hover{box-shadow:0 4px 0 #1265a0,0 8px 24px rgba(26,127,176,.5);transform:translateY(3px)}
+    .tg-btn:active{box-shadow:0 1px 0 #1265a0,0 4px 12px rgba(26,127,176,.4);transform:translateY(6px)}
+    .tg-btn::before{
+      content:'';position:absolute;top:0;left:-60%;
+      width:50%;height:100%;
+      background:linear-gradient(90deg,transparent,rgba(255,255,255,.22),transparent);
+      transform:skewX(-20deg);
+      animation:shine 2.8s 2s ease infinite;
+    }
+
+    .tg-btn-icon{
+      flex-shrink:0;background:rgba(255,255,255,.2);
+      border-radius:12px;width:44px;height:44px;
+      display:grid;place-items:center;
+    }
+    .tg-btn-text{text-align:left;line-height:1.2}
+    .tg-btn-text small{display:block;font-size:11px;font-weight:600;opacity:.8;letter-spacing:.5px;text-transform:uppercase}
+    .tg-btn-text strong{font-size:17px}
+    .btn-arrow{margin-left:auto;font-size:22px;flex-shrink:0;will-change:transform;animation:arrowRight 1s ease infinite}
+
+    /* Keyframes */
+    @keyframes popIn{from{opacity:0;transform:scale(.3)}to{opacity:1;transform:scale(1)}}
+    @keyframes bounceIn{from{opacity:0;transform:scale(.4) rotate(-20deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+    @keyframes drawCheck{to{stroke-dashoffset:0}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes arrowBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+    @keyframes arrowRight{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
+    @keyframes btnShake{
+      0%,35%,100%{transform:rotate(0deg) translateY(0)}
+      5%{transform:rotate(-2.5deg) translateY(-2px)}
+      10%{transform:rotate(2.5deg) translateY(-3px)}
+      15%{transform:rotate(-2deg) translateY(-2px)}
+      20%{transform:rotate(2deg) translateY(-1px)}
+      25%{transform:rotate(-1deg) translateY(0)}
+      30%{transform:rotate(1deg)}
+    }
+    @keyframes shine{0%{left:-60%}40%,100%{left:130%}}
+
+    @media(prefers-reduced-motion:reduce){
+      *,*::before,*::after{animation-duration:.01ms !important}
+    }
+    @media(min-width:480px){
+      .page{margin:32px auto;border-radius:28px;min-height:unset}
+    }
+  </style>
+</head>
+
+<body>
+  <main class="page" role="main">
+
+    <!-- 1) PHONE SCREEN -->
+    <section class="screen phone-screen" id="phoneScreen">
+      <div class="tel-icon-wrap" aria-hidden="true">🎓</div>
+
+      <h1 class="title">Bepul qatnashish</h1>
+
+      <p class="subtitle">
+        Masterklassga qo'shilish uchun<br>
+        telefon raqamingizni kiriting
+      </p>
+
+      <div class="event-pill" role="note" aria-label="Vebinar vaqti">
+        📅 22–23 iyun &nbsp;·&nbsp; ⏰ Soat 20:30
+      </div>
+
+      <form class="tel-form" id="regForm" novalidate>
+        <label class="tel-label" for="phoneInput">Telefon raqam</label>
+        <div class="tel-input-wrap" id="phoneWrap">
+          <span class="tel-prefix">🇺🇿 +998</span>
+          <input type="tel" id="phoneInput" inputmode="numeric"
+            placeholder="90 123 45 67" maxlength="12"
+            autocomplete="tel" aria-required="true"
+            aria-describedby="phoneError">
+        </div>
+        <p class="tel-error" id="phoneError" role="alert" aria-live="polite">
+          Iltimos, to'g'ri telefon raqam kiriting (9 ta raqam)
+        </p>
+        <button type="submit" class="tel-submit" id="submitBtn">
+          Ro'yxatdan o'tish
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff"
+            stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+            <polyline points="12 5 19 12 12 19"/>
+          </svg>
+        </button>
+      </form>
+
+      <p class="note">🔒 Ma'lumotlaringiz xavfsiz. Spam yo'q.</p>
+    </section>
+
+    <!-- 2) CONGRATS SCREEN -->
+    <section class="screen congrats-screen" id="congratsScreen" hidden aria-live="polite">
+
+      <div class="check-wrap" aria-hidden="true">
+        <div class="check-bg"></div>
+        <div class="check-ring"></div>
+        <span class="check-svg">
+          <svg width="46" height="46" viewBox="0 0 46 46" fill="none">
+            <path d="M10 23L20 33L36 14" stroke="#16a34a" stroke-width="4.5"
+              stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      </div>
+
+      <span class="confetti" aria-hidden="true">🎉🎊🎉</span>
+
+      <h1 class="title">
+        Tabriklaymiz!<br>
+        <span class="green">Ro'yxatdan o'tdingiz!</span>
+      </h1>
+
+      <p class="subtitle">
+        Masterklass havolasi va barcha ma'lumotlar<br>
+        <strong>Telegram kanalimizda</strong> bo'ladi.<br>
+        Hoziroq qo'shiling! 👇
+      </p>
+
+      <div class="event-pill" role="note" aria-label="Vebinar vaqti">
+        📅 22–23 iyun &nbsp;·&nbsp; ⏰ Soat 20:30
+      </div>
+
+      <span class="arrow-down" aria-hidden="true">👇</span>
+
+      <a href="https://t.me/+GKsQbjbsMw1hMTUy"
+        class="tg-btn"
+        target="_blank"
+        rel="noopener noreferrer"
+        id="tg-join-btn"
+        aria-label="Telegram kanalga qo'shilish — vebinar havolasini olish uchun">
+        <span class="tg-btn-icon" aria-hidden="true">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+            <path d="M21.5 2.5L2 10.5L9 12.5M21.5 2.5L14.5 21.5L9 12.5M21.5 2.5L9 12.5"
+              stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+        <span class="tg-btn-text">
+          <small>Hoziroq qo'shiling</small>
+          <strong>Telegram kanal →</strong>
+        </span>
+        <span class="btn-arrow" aria-hidden="true">➜</span>
+      </a>
+
+      <p class="note">
+        ⚠️ Kanalga qo'shilmasangiz, masterklass havolasini olmasligi mumkin.<br>
+        🎁 Kanalda <strong>"Kraskalar to'plami"</strong> sovg'asi ham beriladi!
+      </p>
+
+    </section>
+  </main>
+
+  <!--
+    META PIXEL — OQIM (telegram.html):
+    ✅ PageView — sahifa yuklanganda (bir marta)
+    ✅ Lead — forma muvaffaqiyatli yuborilganda (bir marta, _leadSent flag)
+    ✅ CompleteRegistration — tabriklash ekrani ochilganda (bir marta, _regSent flag)
+    ✅ Contact — Telegram tugmasi bosilganda (bir marta, _contactSent flag)
+    ❌ fbq('init') submit ichida qayta chaqirilmaydi — faqat ph yangilanadi
+  -->
+  <script>
+    !function(f,b,e,v,n,t,s){
+      if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+      n.queue=[];t=b.createElement(e);t.async=!0;t.defer=!0;
+      t.src=v;s=b.getElementsByTagName(e)[0];
+      s.parentNode.insertBefore(t,s)
+    }(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
+
+    fbq('init','3820441638259737');
+    fbq('track','PageView');
+  </script>
+  <noscript><img height="1" width="1" style="display:none" alt=""
+    src="https://www.facebook.com/tr?id=3820441638259737&ev=PageView&noscript=1"/></noscript>
+
+  <script>
+  (function(){
+    var pS  = document.getElementById('phoneScreen'),
+        cS  = document.getElementById('congratsScreen'),
+        frm = document.getElementById('regForm'),
+        inp = document.getElementById('phoneInput'),
+        wrp = document.getElementById('phoneWrap'),
+        err = document.getElementById('phoneError'),
+        btn = document.getElementById('submitBtn'),
+        tgB = document.getElementById('tg-join-btn');
+
+    var _leadSent=false, _regSent=false, _contactSent=false;
+
+    inp.addEventListener('input',function(){
+      var d=inp.value.replace(/\D/g,'').slice(0,9),p=[];
+      if(d.length>0)p.push(d.slice(0,2));
+      if(d.length>2)p.push(d.slice(2,5));
+      if(d.length>5)p.push(d.slice(5,7));
+      if(d.length>7)p.push(d.slice(7,9));
+      inp.value=p.join(' ');
+      wrp.classList.remove('error');
+      err.classList.remove('show');
+    });
+
+    frm.addEventListener('submit',function(e){
+      e.preventDefault();
+      var d=inp.value.replace(/\D/g,'');
+      if(d.length!==9){
+        wrp.classList.add('error');
+        err.classList.add('show');
+        inp.focus();
+        return;
+      }
+      var ph='998'+d;
+      try{sessionStorage.setItem('reg_phone',ph);}catch(x){}
+      btn.disabled=true;
+      btn.textContent='Yuborilmoqda...';
+
+      if(typeof fbq==='function'){
+        fbq('init','3820441638259737',{ph:ph});
+        if(!_leadSent){
+          _leadSent=true;
+          fbq('track','Lead',{content_name:'Ranglar matematikasi masterklass',value:1,currency:'USD'});
+        }
+      }
+      setTimeout(function(){
+        pS.hidden=true;
+        cS.hidden=false;
+        window.scrollTo(0,0);
+        if(typeof fbq==='function'&&!_regSent){
+          _regSent=true;
+          fbq('track','CompleteRegistration',{value:1,currency:'USD',status:'submitted'});
+        }
+      },250);
+    });
+
+    tgB.addEventListener('click',function(){
+      if(typeof fbq==='function'&&!_contactSent){
+        _contactSent=true;
+        fbq('track','Contact',{value:1,currency:'USD'});
+      }
+    });
+  })();
+  </script>
+
+</body>
+</html>
