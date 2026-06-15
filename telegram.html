@@ -16,7 +16,6 @@
     <link rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Nunito:wght@600;700&display=swap">
   </noscript>
-
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{--gd:#16a34a;--text:#111827;--muted:#6b7280;}
@@ -78,7 +77,6 @@
 
 <body>
   <main class="page" role="main">
-
     <!-- 1) PHONE SCREEN -->
     <section class="screen phone-screen" id="phoneScreen">
       <div class="tel-icon-wrap" aria-hidden="true">🎓</div>
@@ -162,33 +160,29 @@
 
   <!--
     ═══════════════════════════════════════════════════
-    META PIXEL — JORIY OQIM (kod + Event Setup Tool):
-
+    META PIXEL — TO'G'RILANGAN OQIM:
     KOD (ushbu fayl) yuboradi:
-      ✅ PageView           — sahifa yuklanganda (1 marta)
-      ✅ CompleteRegistration — forma to'g'ri to'ldirib yuborilganda
-                                (1 marta, _regSent flag)
-      ✅ Contact            — "Telegram kanal" tugmasi bosilganda
-                                (1 marta, _contactSent flag)
+      ✅ PageView            — sahifa yuklanganda (1 marta)
+      ✅ Lead                — forma to'g'ri to'ldirib YUBORILGANDA
+                               (1 marta, _leadSent + eventID)
+      ✅ CompleteRegistration — forma yuborilganda
+                               (1 marta, _regSent + eventID)
+      ✅ Contact             — "Telegram kanal" tugmasi bosilganda
+                               (1 marta, _contactSent)
 
-    META EVENT SETUP TOOL (Ads Manager > Events Manager) yuboradi:
-      ✅ ViewContent — shu sahifa (telegram.html) ochilganda,
-                       URL bo'yicha avtomatik
-      ✅ Lead        — "Telegram kanal" tugmasi bosilganda,
-                       tugma matni bo'yicha avtomatik
+    ⚠️ MUHIM — QO'LDA BAJARILADIGAN QADAM:
+    Facebook EVENT SETUP TOOL'dagi "Lead" qoidasini O'CHIRING!
+    (Events Manager → Data Sources → Pixel →
+     Open Event Setup Tool → "Telegram kanal" tugmasidagi
+     "Lead" qoidasini topib o'chiring.)
 
-    MUHIM: "Lead" eventi ENDI KODDA YO'Q!
-    Sabab — Lead allaqachon Event Setup Tool orqali
-    "Telegram kanal" tugmasida yuboriladi. Agar shu yerda
-    ham fbq('track','Lead',...) chaqirilsa, bitta odam
-    uchun 2 marta Lead yuborilib, Ads Manager'dagi Lead
-    soni Google Sheets'dagi haqiqiy ro'yxatdan o'tganlar
-    sonidan (masalan 214) ancha katta (masalan 415) chiqib
-    ketadi.
+    Sababi: Lead endi KODDA, aynan forma submitda yuboriladi.
+    Agar Event Setup Tool ham "Telegram tugma"da Lead yuborsa,
+    bitta odam uchun 2 marta Lead bo'lib, Ads Manager soni
+    Google Sheets'dagidan 2 baravar ko'p chiqadi (eski muammo).
 
-    Agar kelajakda Event Setup Tool'dagi "Lead" qoidasi
-    o'chirilsa, Lead eventini forma submit ichida QAYTA
-    qo'shish kerak bo'ladi (pastdagi izohlangan kodga qarang).
+    Endi Lead ham, Sheets ham AYNAN BIR NUQTADA (raqam kiritildi)
+    va FAQAT 1 MARTA ishlaydi — shuning uchun raqamlar mos keladi.
     ═══════════════════════════════════════════════════
   -->
 
@@ -249,7 +243,7 @@
         tgB = document.getElementById('tg-join-btn');
 
     // Har bir event faqat bir marta yonadi
-    var _regSent = false, _contactSent = false;
+    var _regSent = false, _contactSent = false, _leadSent = false;
 
     // Agar foydalanuvchi shu sessiyada allaqachon ro'yxatdan o'tgan bo'lsa
     // (masalan sahifani qayta yukladi yoki orqaga qaytdi), forma ekranini
@@ -261,8 +255,8 @@
       pS.hidden = true;
       cS.hidden = false;
       _regSent = true;
+      _leadSent = true;
     }
-
     // Telefon formatlash: "90 123 45 67"
     inp.addEventListener('input', function(){
       var d = inp.value.replace(/\D/g,'').slice(0,9), p = [];
@@ -291,23 +285,23 @@
       btn.disabled = true;
       btn.textContent = 'Yuborilmoqda...';
 
-      // ── PIXEL: "Lead" ATAYLAB bu yerda YO'Q.
-      // Lead Meta Event Setup Tool orqali "Telegram kanal" tugmasida
-      // avtomatik yuboriladi — shu yerda yana yuborilsa, dublikat bo'ladi.
-      //
-      // Agar kelajakda Event Setup Tool'dagi "Lead" qoidasi o'chirilsa,
-      // o'rniga shu yerga qaytaring:
-      //
-      // if(typeof fbq === 'function'){
-      //   fbq('track', 'Lead', {
-      //     content_name: 'Ranglar matematikasi masterklass',
-      //     value: 1,
-      //     currency: 'USD'
-      //   }, { eventID: 'lead_' + ph + '_' + Date.now() });
-      // }
-
-      // ── GOOGLE SHEETS ga raqam yuborish
+      // ── GOOGLE SHEETS ga raqam yuborish (1 marta, shu nuqtada)
       sendToSheets('+998' + d);
+
+      // ── PIXEL: "Lead" ENDI AYNAN SHU YERDA — forma submit ichida.
+      // Sheets ham, Lead ham bir xil voqeada (raqam kiritildi) ishlaydi,
+      // shuning uchun raqamlar mos keladi.
+      // _leadSent flag + eventID => bir odam uchun faqat 1 marta.
+      if(typeof fbq === 'function' && !_leadSent){
+        _leadSent = true;
+        fbq('track', 'Lead', {
+          content_name: 'Komuflyaj va Kokteyllar masterklass',
+          value: 1,
+          currency: 'USD'
+        }, {
+          eventID: 'lead_' + ph
+        });
+      }
 
       // ── Ekranni almashtirish
       setTimeout(function(){
@@ -323,14 +317,15 @@
             currency: 'USD',
             status: 'submitted'
           }, {
-            eventID: 'reg_' + ph + '_' + Date.now()
+            eventID: 'reg_' + ph
           });
         }
       }, 250);
     });
 
-    // Telegram bosilganda — qo'shimcha "Contact" signali.
-    // (Lead'ni Event Setup Tool shu tugmada o'zi yuboradi.)
+    // Telegram bosilganda — qo'shimcha "Contact" signali (Lead EMAS).
+    // Lead endi faqat forma submitda yuboriladi, shuning uchun bu yerda
+    // Lead yo'q — aks holda yana dublikat bo'lardi.
     tgB.addEventListener('click', function(){
       if(typeof fbq === 'function' && !_contactSent){
         _contactSent = true;
