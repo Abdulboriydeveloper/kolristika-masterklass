@@ -162,24 +162,33 @@
 
   <!--
     ═══════════════════════════════════════════════════
-    META PIXEL — TO'G'RI OQIM:
+    META PIXEL — JORIY OQIM (kod + Event Setup Tool):
 
-    MUAMMO (ilgari):
-      fbq('init', id, {ph}) submit ichida QAYTA chaqirilardi.
-      Bu pixel SDK ni reinitialize qilib, Lead eventini
-      queue + yangi init orqali 2 marta yuborishi mumkin edi.
+    KOD (ushbu fayl) yuboradi:
+      ✅ PageView           — sahifa yuklanganda (1 marta)
+      ✅ CompleteRegistration — forma to'g'ri to'ldirib yuborilganda
+                                (1 marta, _regSent flag)
+      ✅ Contact            — "Telegram kanal" tugmasi bosilganda
+                                (1 marta, _contactSent flag)
 
-    YECHIM (hozir):
-      1) fbq('init') faqat BIR MARTA — sahifa yuklanishida
-      2) Advanced Matching uchun fbq('init', id, {ph}) o'rniga
-         fbq('track') ga userData parametr sifatida beriladi
-      3) Har bir event faqat bir marta yonadi (flag bilan)
+    META EVENT SETUP TOOL (Ads Manager > Events Manager) yuboradi:
+      ✅ ViewContent — shu sahifa (telegram.html) ochilganda,
+                       URL bo'yicha avtomatik
+      ✅ Lead        — "Telegram kanal" tugmasi bosilganda,
+                       tugma matni bo'yicha avtomatik
 
-    EVENT OQIMI:
-      ✅ PageView      — sahifa yuklanganda (1 marta)
-      ✅ Lead          — forma submit (1 marta, _leadSent flag)
-      ✅ CompleteReg   — congrats ekran (1 marta, _regSent flag)
-      ✅ Contact       — Telegram bosilganda (1 marta, _contactSent)
+    MUHIM: "Lead" eventi ENDI KODDA YO'Q!
+    Sabab — Lead allaqachon Event Setup Tool orqali
+    "Telegram kanal" tugmasida yuboriladi. Agar shu yerda
+    ham fbq('track','Lead',...) chaqirilsa, bitta odam
+    uchun 2 marta Lead yuborilib, Ads Manager'dagi Lead
+    soni Google Sheets'dagi haqiqiy ro'yxatdan o'tganlar
+    sonidan (masalan 214) ancha katta (masalan 415) chiqib
+    ketadi.
+
+    Agar kelajakda Event Setup Tool'dagi "Lead" qoidasi
+    o'chirilsa, Lead eventini forma submit ichida QAYTA
+    qo'shish kerak bo'ladi (pastdagi izohlangan kodga qarang).
     ═══════════════════════════════════════════════════
   -->
 
@@ -194,7 +203,6 @@
     s.parentNode.insertBefore(t,s)
   }(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');
 
-  // FAQAT BIR MARTA init — Advanced Matching keyinroq userData orqali beriladi
   fbq('init','3820441638259737');
   fbq('track','PageView');
   </script>
@@ -241,7 +249,19 @@
         tgB = document.getElementById('tg-join-btn');
 
     // Har bir event faqat bir marta yonadi
-    var _leadSent = false, _regSent = false, _contactSent = false;
+    var _regSent = false, _contactSent = false;
+
+    // Agar foydalanuvchi shu sessiyada allaqachon ro'yxatdan o'tgan bo'lsa
+    // (masalan sahifani qayta yukladi yoki orqaga qaytdi), forma ekranini
+    // qaytadan ko'rsatmaymiz va CompleteRegistration'ni ikkinchi marta
+    // yubormaymiz / Sheets'ga ikkinchi marta yozmaymiz.
+    var _already = false;
+    try { _already = !!sessionStorage.getItem('reg_phone'); } catch(x){}
+    if (_already) {
+      pS.hidden = true;
+      cS.hidden = false;
+      _regSent = true;
+    }
 
     // Telefon formatlash: "90 123 45 67"
     inp.addEventListener('input', function(){
@@ -271,30 +291,31 @@
       btn.disabled = true;
       btn.textContent = 'Yuborilmoqda...';
 
-      // ── 1) PIXEL: Lead — fbq('init') QAYTA CHAQIRILMAYDI
-      // Advanced Matching uchun userData parametrini ishlatamiz
-      if(typeof fbq === 'function' && !_leadSent){
-        _leadSent = true;
-        fbq('track', 'Lead', {
-          content_name: 'Ranglar matematikasi masterklass',
-          value: 1,
-          currency: 'USD'
-        }, {
-          // eventID — deduplikatsiya uchun (server-side pixel bilan mos)
-          eventID: 'lead_' + ph + '_' + Date.now()
-        });
-      }
+      // ── PIXEL: "Lead" ATAYLAB bu yerda YO'Q.
+      // Lead Meta Event Setup Tool orqali "Telegram kanal" tugmasida
+      // avtomatik yuboriladi — shu yerda yana yuborilsa, dublikat bo'ladi.
+      //
+      // Agar kelajakda Event Setup Tool'dagi "Lead" qoidasi o'chirilsa,
+      // o'rniga shu yerga qaytaring:
+      //
+      // if(typeof fbq === 'function'){
+      //   fbq('track', 'Lead', {
+      //     content_name: 'Ranglar matematikasi masterklass',
+      //     value: 1,
+      //     currency: 'USD'
+      //   }, { eventID: 'lead_' + ph + '_' + Date.now() });
+      // }
 
-      // ── 2) GOOGLE SHEETS ga raqam yuborish
+      // ── GOOGLE SHEETS ga raqam yuborish
       sendToSheets('+998' + d);
 
-      // ── 3) Ekranni almashtirish
+      // ── Ekranni almashtirish
       setTimeout(function(){
         pS.hidden = true;
         cS.hidden = false;
         window.scrollTo(0, 0);
 
-        // CompleteRegistration — faqat bir marta
+        // CompleteRegistration — "raqam qoldirdi" signali, faqat bir marta
         if(typeof fbq === 'function' && !_regSent){
           _regSent = true;
           fbq('track', 'CompleteRegistration', {
@@ -308,7 +329,8 @@
       }, 250);
     });
 
-    // Telegram bosilganda
+    // Telegram bosilganda — qo'shimcha "Contact" signali.
+    // (Lead'ni Event Setup Tool shu tugmada o'zi yuboradi.)
     tgB.addEventListener('click', function(){
       if(typeof fbq === 'function' && !_contactSent){
         _contactSent = true;
