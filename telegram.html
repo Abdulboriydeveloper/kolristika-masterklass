@@ -77,6 +77,7 @@
 
 <body>
   <main class="page" role="main">
+
     <!-- 1) PHONE SCREEN -->
     <section class="screen phone-screen" id="phoneScreen">
       <div class="tel-icon-wrap" aria-hidden="true">🎓</div>
@@ -86,7 +87,7 @@
         telefon raqamingizni kiriting
       </p>
       <div class="event-pill" role="note" aria-label="Vebinar vaqti">
-        📅 23–24 iyun &nbsp;·&nbsp; ⏰ Soat 20:30
+        📅 22–23 iyun &nbsp;·&nbsp; ⏰ Soat 20:30
       </div>
       <form class="tel-form" id="regForm" novalidate>
         <label class="tel-label" for="phoneInput">Telefon raqam</label>
@@ -132,10 +133,10 @@
         Hoziroq qo'shiling! 👇
       </p>
       <div class="event-pill" role="note" aria-label="Vebinar vaqti">
-        📅 23–24 iyun &nbsp;·&nbsp; ⏰ Soat 20:30
+        📅 22–23 iyun &nbsp;·&nbsp; ⏰ Soat 20:30
       </div>
       <span class="arrow-down" aria-hidden="true">👇</span>
-      <a href="https://t.me/+f12JwfatCcc2NmZi"
+      <a href="https://t.me/+GKsQbjbsMw1hMTUy"
         class="tg-btn" target="_blank" rel="noopener noreferrer"
         id="tg-join-btn"
         aria-label="Telegram kanalga qo'shilish — masterklass havolasini olish uchun">
@@ -158,35 +159,7 @@
     </section>
   </main>
 
-  <!--
-    ═══════════════════════════════════════════════════
-    META PIXEL — TO'G'RILANGAN OQIM:
-    KOD (ushbu fayl) yuboradi:
-      ✅ PageView            — sahifa yuklanganda (1 marta)
-      ✅ Lead                — forma to'g'ri to'ldirib YUBORILGANDA
-                               (1 marta, _leadSent + eventID)
-      ✅ CompleteRegistration — forma yuborilganda
-                               (1 marta, _regSent + eventID)
-      ✅ Contact             — "Telegram kanal" tugmasi bosilganda
-                               (1 marta, _contactSent)
-
-    ⚠️ MUHIM — QO'LDA BAJARILADIGAN QADAM:
-    Facebook EVENT SETUP TOOL'dagi "Lead" qoidasini O'CHIRING!
-    (Events Manager → Data Sources → Pixel →
-     Open Event Setup Tool → "Telegram kanal" tugmasidagi
-     "Lead" qoidasini topib o'chiring.)
-
-    Sababi: Lead endi KODDA, aynan forma submitda yuboriladi.
-    Agar Event Setup Tool ham "Telegram tugma"da Lead yuborsa,
-    bitta odam uchun 2 marta Lead bo'lib, Ads Manager soni
-    Google Sheets'dagidan 2 baravar ko'p chiqadi (eski muammo).
-
-    Endi Lead ham, Sheets ham AYNAN BIR NUQTADA (raqam kiritildi)
-    va FAQAT 1 MARTA ishlaydi — shuning uchun raqamlar mos keladi.
-    ═══════════════════════════════════════════════════
-  -->
-
-  <!-- Pixel init — sahifa yuklanganda, bir marta -->
+  <!-- Meta Pixel — init -->
   <script>
   !function(f,b,e,v,n,t,s){
     if(f.fbq)return;n=f.fbq=function(){n.callMethod?
@@ -203,24 +176,16 @@
   <noscript><img height="1" width="1" style="display:none" alt=""
     src="https://www.facebook.com/tr?id=3820441638259737&ev=PageView&noscript=1"/></noscript>
 
-  <!-- Google Apps Script Web App URL — Sheets ga yozish uchun -->
+  <!-- Google Sheets integratsiyasi -->
   <script>
-  // ══════════════════════════════════════════════════
-  // GOOGLE SHEETS INTEGRATSIYASI
-  // Quyidagi URL ni o'zingizning Apps Script Web App URL bilan almashtiring
-  // (qanday olish: README pastda)
-  // ══════════════════════════════════════════════════
   var SHEETS_URL = 'https://script.google.com/macros/s/AKfycbyH6Z45jRqu0SgB8ULxUuCNI5ZZt0QJGcjc-xb0YqHNNSjngQT4K8xcfZwVGR_PxTn0/exec';
 
   function sendToSheets(phone) {
-    // Apps Script ishlamasa sahifa ishini to'xtatmaydi
     try {
       var url = SHEETS_URL +
         '?phone=' + encodeURIComponent(phone) +
         '&date=' + encodeURIComponent(new Date().toLocaleString('uz-UZ',{timeZone:'Asia/Tashkent'})) +
         '&source=' + encodeURIComponent(document.referrer || 'direct');
-
-      // fetch yo'q bo'lsa Image beacon ishlatamiz (universal)
       if (window.fetch) {
         fetch(url, { method: 'GET', mode: 'no-cors' }).catch(function(){});
       } else {
@@ -230,7 +195,7 @@
   }
   </script>
 
-  <!-- Forma logikasi -->
+  <!-- Forma logikasi — TO'G'RILANGAN (bitta addEventListener, ikki marta emas) -->
   <script>
   (function(){
     var pS  = document.getElementById('phoneScreen'),
@@ -242,22 +207,20 @@
         btn = document.getElementById('submitBtn'),
         tgB = document.getElementById('tg-join-btn');
 
-    // Har bir event faqat bir marta yonadi
-    var _regSent = false, _contactSent = false, _leadSent = false;
+    // ── Flaglar: har bir pixel eventi faqat 1 marta yonadi
+    var _leadSent = false, _regSent = false, _contactSent = false;
 
-    // Agar foydalanuvchi shu sessiyada allaqachon ro'yxatdan o'tgan bo'lsa
-    // (masalan sahifani qayta yukladi yoki orqaga qaytdi), forma ekranini
-    // qaytadan ko'rsatmaymiz va CompleteRegistration'ni ikkinchi marta
-    // yubormaymiz / Sheets'ga ikkinchi marta yozmaymiz.
+    // ── Sessiyada allaqachon ro'yxatdan o'tganmi?
     var _already = false;
     try { _already = !!sessionStorage.getItem('reg_phone'); } catch(x){}
     if (_already) {
       pS.hidden = true;
       cS.hidden = false;
-      _regSent = true;
       _leadSent = true;
+      _regSent  = true;
     }
-    // Telefon formatlash: "90 123 45 67"
+
+    // ── Telefon formatlash: "90 123 45 67"
     inp.addEventListener('input', function(){
       var d = inp.value.replace(/\D/g,'').slice(0,9), p = [];
       if(d.length>0) p.push(d.slice(0,2));
@@ -269,86 +232,85 @@
       err.classList.remove('show');
     });
 
-<!-- telegram.html ichida forma submit qismini almashtiring -->
+    // ── Forma submit — BU YERDA FAQAT 1 TA addEventListener BO'LISHI KERAK
+    frm.addEventListener('submit', function(e){
+      e.preventDefault();
 
-frm.addEventListener('submit', function(e){
-  e.preventDefault();
-  var d = inp.value.replace(/\D/g,'');
-  if(d.length !== 9){
-    wrp.classList.add('error');
-    err.classList.add('show');
-    inp.focus();
-    return;
-  }
+      var d = inp.value.replace(/\D/g,'');
+      if(d.length !== 9){
+        wrp.classList.add('error');
+        err.classList.add('show');
+        inp.focus();
+        return;
+      }
 
-  var ph = '998' + d;
-  
-  // ✅ YANGI: Sessiyaga unique eventID saqlash
-  var storedEventId;
-  try {
-    storedEventId = sessionStorage.getItem('lead_event_id');
-  } catch(x){}
-  
-  // Agar avval yuborilgan bo'lsa — qayta yubormaydi
-  if(storedEventId) {
-    // Faqat ekranni ko'rsatamiz, pixel yubormaymiz
-    pS.hidden = true;
-    cS.hidden = false;
-    return;
-  }
-  
-  // ✅ Unique eventID yaratish
-  var eventId = 'lead_' + ph + '_' + Date.now();
-  
-  try { 
-    sessionStorage.setItem('reg_phone', ph);
-    sessionStorage.setItem('lead_event_id', eventId); // ✅ saqlash
-  } catch(x){}
+      var ph = '998' + d;
 
-  btn.disabled = true;
-  btn.textContent = 'Yuborilmoqda...';
+      // ── Sessiyada saqlangan eventID bormi? (qayta submit oldini olish)
+      var storedEventId;
+      try { storedEventId = sessionStorage.getItem('lead_event_id'); } catch(x){}
+      if(storedEventId || _leadSent) {
+        // Pixel yubormaymiz, faqat ekranni ko'rsatamiz
+        pS.hidden = true;
+        cS.hidden = false;
+        window.scrollTo(0,0);
+        return;
+      }
 
-  sendToSheets('+998' + d);
+      // ── Unique eventID — telefon + vaqt (har bir foydalanuvchi uchun noyob)
+      var eventId = 'lead_' + ph + '_' + Date.now();
+      try {
+        sessionStorage.setItem('reg_phone', ph);
+        sessionStorage.setItem('lead_event_id', eventId);
+      } catch(x){}
 
-  // ✅ Lead — bir marta, to'g'ri eventID bilan
-  if(typeof fbq === 'function' && !_leadSent){
-    _leadSent = true;
-    fbq('track', 'Lead', {
-      content_name: 'Komuflyaj va Kokteyllar masterklass',
-      value: 1,
-      currency: 'USD'
-    }, {
-      eventID: eventId  // ✅ unique va sessionda saqlanadi
+      btn.disabled = true;
+      btn.textContent = 'Yuborilmoqda...';
+
+      // ── Google Sheets ga yuborish
+      sendToSheets('+998' + d);
+
+      // ── PIXEL: Lead — FAQAT 1 MARTA, forma submit ichida
+      // eventID bilan deduplikatsiya ta'minlanadi
+      if(typeof fbq === 'function' && !_leadSent){
+        _leadSent = true;
+        fbq('track', 'Lead', {
+          content_name: 'Komuflyaj va Kokteyllar masterklass',
+          value: 1,
+          currency: 'USD'
+        }, {
+          eventID: eventId
+        });
+      }
+
+      // ── Ekranni almashtirish (250ms kechikish — pixel so'rovi uchun)
+      setTimeout(function(){
+        pS.hidden = true;
+        cS.hidden = false;
+        window.scrollTo(0, 0);
+
+        // CompleteRegistration — faqat 1 marta
+        if(typeof fbq === 'function' && !_regSent){
+          _regSent = true;
+          fbq('track', 'CompleteRegistration', {
+            value: 1,
+            currency: 'USD',
+            status: 'submitted'
+          }, {
+            eventID: 'reg_' + ph + '_' + Date.now()
+          });
+        }
+      }, 250);
     });
-  }
 
-  setTimeout(function(){
-    pS.hidden = true;
-    cS.hidden = false;
-    window.scrollTo(0, 0);
-
-    if(typeof fbq === 'function' && !_regSent){
-      _regSent = true;
-      fbq('track', 'CompleteRegistration', {
-        value: 1,
-        currency: 'USD',
-        status: 'submitted'
-      }, {
-        eventID: 'reg_' + ph + '_' + Date.now()
-      });
-    }
-  }, 250);
-});
-
-    // Telegram bosilganda — qo'shimcha "Contact" signali (Lead EMAS).
-    // Lead endi faqat forma submitda yuboriladi, shuning uchun bu yerda
-    // Lead yo'q — aks holda yana dublikat bo'lardi.
+    // ── Telegram tugmasi — Contact signali (Lead EMAS, dublikat bo'lmasin)
     tgB.addEventListener('click', function(){
       if(typeof fbq === 'function' && !_contactSent){
         _contactSent = true;
         fbq('track', 'Contact', { value: 1, currency: 'USD' });
       }
     });
+
   })();
   </script>
 
