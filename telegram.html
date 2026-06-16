@@ -269,59 +269,76 @@
       err.classList.remove('show');
     });
 
-    frm.addEventListener('submit', function(e){
-      e.preventDefault();
-      var d = inp.value.replace(/\D/g,'');
-      if(d.length !== 9){
-        wrp.classList.add('error');
-        err.classList.add('show');
-        inp.focus();
-        return;
-      }
+<!-- telegram.html ichida forma submit qismini almashtiring -->
 
-      var ph = '998' + d;
-      try{ sessionStorage.setItem('reg_phone', ph); } catch(x){}
+frm.addEventListener('submit', function(e){
+  e.preventDefault();
+  var d = inp.value.replace(/\D/g,'');
+  if(d.length !== 9){
+    wrp.classList.add('error');
+    err.classList.add('show');
+    inp.focus();
+    return;
+  }
 
-      btn.disabled = true;
-      btn.textContent = 'Yuborilmoqda...';
+  var ph = '998' + d;
+  
+  // ✅ YANGI: Sessiyaga unique eventID saqlash
+  var storedEventId;
+  try {
+    storedEventId = sessionStorage.getItem('lead_event_id');
+  } catch(x){}
+  
+  // Agar avval yuborilgan bo'lsa — qayta yubormaydi
+  if(storedEventId) {
+    // Faqat ekranni ko'rsatamiz, pixel yubormaymiz
+    pS.hidden = true;
+    cS.hidden = false;
+    return;
+  }
+  
+  // ✅ Unique eventID yaratish
+  var eventId = 'lead_' + ph + '_' + Date.now();
+  
+  try { 
+    sessionStorage.setItem('reg_phone', ph);
+    sessionStorage.setItem('lead_event_id', eventId); // ✅ saqlash
+  } catch(x){}
 
-      // ── GOOGLE SHEETS ga raqam yuborish (1 marta, shu nuqtada)
-      sendToSheets('+998' + d);
+  btn.disabled = true;
+  btn.textContent = 'Yuborilmoqda...';
 
-      // ── PIXEL: "Lead" ENDI AYNAN SHU YERDA — forma submit ichida.
-      // Sheets ham, Lead ham bir xil voqeada (raqam kiritildi) ishlaydi,
-      // shuning uchun raqamlar mos keladi.
-      // _leadSent flag + eventID => bir odam uchun faqat 1 marta.
-      if(typeof fbq === 'function' && !_leadSent){
-        _leadSent = true;
-        fbq('track', 'Lead', {
-          content_name: 'Komuflyaj va Kokteyllar masterklass',
-          value: 1,
-          currency: 'USD'
-        }, {
-          eventID: 'lead_' + ph
-        });
-      }
+  sendToSheets('+998' + d);
 
-      // ── Ekranni almashtirish
-      setTimeout(function(){
-        pS.hidden = true;
-        cS.hidden = false;
-        window.scrollTo(0, 0);
-
-        // CompleteRegistration — "raqam qoldirdi" signali, faqat bir marta
-        if(typeof fbq === 'function' && !_regSent){
-          _regSent = true;
-          fbq('track', 'CompleteRegistration', {
-            value: 1,
-            currency: 'USD',
-            status: 'submitted'
-          }, {
-            eventID: 'reg_' + ph
-          });
-        }
-      }, 250);
+  // ✅ Lead — bir marta, to'g'ri eventID bilan
+  if(typeof fbq === 'function' && !_leadSent){
+    _leadSent = true;
+    fbq('track', 'Lead', {
+      content_name: 'Komuflyaj va Kokteyllar masterklass',
+      value: 1,
+      currency: 'USD'
+    }, {
+      eventID: eventId  // ✅ unique va sessionda saqlanadi
     });
+  }
+
+  setTimeout(function(){
+    pS.hidden = true;
+    cS.hidden = false;
+    window.scrollTo(0, 0);
+
+    if(typeof fbq === 'function' && !_regSent){
+      _regSent = true;
+      fbq('track', 'CompleteRegistration', {
+        value: 1,
+        currency: 'USD',
+        status: 'submitted'
+      }, {
+        eventID: 'reg_' + ph + '_' + Date.now()
+      });
+    }
+  }, 250);
+});
 
     // Telegram bosilganda — qo'shimcha "Contact" signali (Lead EMAS).
     // Lead endi faqat forma submitda yuboriladi, shuning uchun bu yerda
